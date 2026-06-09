@@ -3,53 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>In-App Browser 導流測試</title>
+    <title>直播間【第一頁】測試</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; }
-        .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: white; border-radius: 5px; text-decoration: none; margin: 10px; }
-        #log { background: #f4f4f4; padding: 10px; border-radius: 5px; word-break: break-all; text-align: left;}
+        body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f0f8ff; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { display: inline-block; padding: 12px 24px; background: #28a745; color: white; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 10px; }
+        .storage-box { text-align: left; background: #eef2f7; padding: 15px; border-radius: 5px; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <h2>⏱️ 倒數計時測試</h2>
-    <h1 id="timer">剩餘秒數: 10 秒</h1>
-    <p id="status">正在初始化...</p>
+    <div class="card">
+        <h2>📺 直播間 ID: <span style="color: #007bff;">page-1</span></h2>
+        <hr>
+        <h3>⏱️ 本頁計時器</h3>
+        <h1 id="timer">LocalStorage: 10 秒 | Session: 10 秒</h1>
+        <p id="status">正在讀取儲存狀態...</p>
+    </div>
 
-    <hr>
+    <div class="card">
+        <h3>🔄 跨頁跳轉測試</h3>
+        <p>點擊下方按鈕跳轉到【第二頁】，觀察第一頁的秒數是否會被蓋掉或重置。</p>
+        <a href="page2.html" class="btn">👉 前往第二頁 (page-2)</a>
+    </div>
 
-    <h3>🛠️ 實驗步驟（驗證不共用）：</h3>
-    <ol style="text-align: left;">
-        <li>在 <b>LINE/FB 內</b>打開此網頁，觀察秒數是否持續減少（驗證可儲存）。</li>
-        <li>在秒數變成 5 秒時，點選右上角<b>「使用 Safari/Chrome 開啟」</b>。</li>
-        <li>觀察新開的瀏覽器是否<b>「變回 10 秒重新倒數」</b>（驗證資料不共用）。</li>
-    </ol>
-
-    <div id="log"><b>User Agent:</b> <br></div>
+    <div class="storage-box">
+        <b>目前環境數據：</b><br>
+        <span id="ua-log"></span>
+    </div>
 
     <script>
-        // 顯示目前的 User Agent 方便判斷環境
-        document.getElementById('log').innerHTML += navigator.userAgent;
+        const PAGE_ID = 'page-1';
+        document.getElementById('ua-log').innerText = navigator.userAgent;
 
-        // 初始化秒數：如果 LocalStorage 有紀錄就用舊的，沒有就從 10 開始
-        let targetKey = 'redirect_countdown';
-        let seconds = localStorage.getItem(targetKey) ? parseInt(localStorage.getItem(targetKey)) : 10;
-        
+        // 設定獨立的 Key
+        const localKey = `local_countdown_${PAGE_ID}`;
+        const sessionKey = `session_countdown_${PAGE_ID}`;
+
+        // 初始化秒數（如果有舊紀錄就讀取，沒有就從 10 開始）
+        let localSec = localStorage.getItem(localKey) ? parseInt(localStorage.getItem(localKey)) : 10;
+        let sessionSec = sessionStorage.getItem(sessionKey) ? parseInt(sessionStorage.getItem(sessionKey)) : 10;
+
         const timerEl = document.getElementById('timer');
         const statusEl = document.getElementById('status');
 
-        statusEl.innerText = "成功讀取 LocalStorage！目前剩餘: " + seconds + " 秒";
+        statusEl.innerText = "成功獨立紀錄！";
 
         const interval = setInterval(() => {
-            seconds--;
-            timerEl.innerText = `剩餘秒數: ${seconds} 秒`;
-            localStorage.setItem(targetKey, seconds); // 寫入 LocalStorage
+            localSec--;
+            sessionSec--;
+            
+            timerEl.innerText = `Local: ${localSec}s | Session: ${sessionSec}s`;
 
-            if (seconds <= 0) {
+            // 寫入各自的儲存空間
+            localStorage.setItem(localKey, localSec);
+            sessionStorage.setItem(sessionKey, sessionSec);
+
+            if (localSec <= 0 && sessionSec <= 0) {
                 clearInterval(interval);
-                timerEl.innerText = "💥 觸發強制轉導！";
-                localStorage.removeItem(targetKey); // 轉導後清除
-                // 這裡可以寫 window.location.href = '你的App下載連結';
+                timerEl.innerText = "💥 倒數結束！";
+                localStorage.removeItem(localKey);
+                sessionStorage.removeItem(sessionKey);
             }
         }, 1000);
     </script>
