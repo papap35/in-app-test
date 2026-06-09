@@ -7,7 +7,7 @@
     <style>
         body { font-family: sans-serif; padding: 20px; text-align: center; background-color: #f0f8ff; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn { display: inline-block; padding: 12px 24px; background: #28a745; color: white; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 10px; }
+        .btn { display: inline-block; padding: 12px 24px; background: #007bff; color: white; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 10px; }
         .storage-box { text-align: left; background: #eef2f7; padding: 15px; border-radius: 5px; font-family: monospace; }
     </style>
 </head>
@@ -17,8 +17,8 @@
         <h2>📺 直播間 ID: <span style="color: #007bff;">page-1</span></h2>
         <hr>
         <h3>⏱️ 本頁計時器</h3>
-        <h1 id="timer">LocalStorage: 10 秒 | Session: 10 秒</h1>
-        <p id="status">正在讀取儲存狀態...</p>
+        <h1 id="timer" style="color: #666;">⏳ 儲存空間讀取中...</h1>
+        <p id="status">正在初始化...</p>
     </div>
 
     <div class="card">
@@ -36,26 +36,28 @@
         const PAGE_ID = 'page-1';
         document.getElementById('ua-log').innerText = navigator.userAgent;
 
-        // 設定獨立的 Key
         const localKey = `local_countdown_${PAGE_ID}`;
         const sessionKey = `session_countdown_${PAGE_ID}`;
-
-        // 初始化秒數（如果有舊紀錄就讀取，沒有就從 10 開始）
-        let localSec = localStorage.getItem(localKey) ? parseInt(localStorage.getItem(localKey)) : 10;
-        let sessionSec = sessionStorage.getItem(sessionKey) ? parseInt(sessionStorage.getItem(sessionKey)) : 10;
 
         const timerEl = document.getElementById('timer');
         const statusEl = document.getElementById('status');
 
-        statusEl.innerText = "成功獨立紀錄！";
+        // 1. 從 Storage 讀取資料
+        let localSec = localStorage.getItem(localKey) ? parseInt(localStorage.getItem(localKey)) : 10;
+        let sessionSec = sessionStorage.getItem(sessionKey) ? parseInt(sessionStorage.getItem(sessionKey)) : 10;
 
+        // 2. 讀取完成後，立刻更新畫面顏色與文字（移除讀取中）
+        timerEl.style.color = '#000'; 
+        timerEl.innerText = `Local: ${localSec}s | Session: ${sessionSec}s`;
+        statusEl.innerText = "✅ 儲存狀態讀取成功！";
+
+        // 3. 啟動計時器
         const interval = setInterval(() => {
             localSec--;
             sessionSec--;
             
             timerEl.innerText = `Local: ${localSec}s | Session: ${sessionSec}s`;
 
-            // 寫入各自的儲存空間
             localStorage.setItem(localKey, localSec);
             sessionStorage.setItem(sessionKey, sessionSec);
 
