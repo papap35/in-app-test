@@ -2,6 +2,12 @@
 
 本專案為一個輕量化的前端驗證網頁 (Proof of Concept)，旨在測試與實機驗證在主流社群 App (LINE、FB、IG) 的內建瀏覽器 (In-App Browser) 環境中，Web Storage (`LocalStorage` / `SessionStorage`) 的運作行為、多頁面獨立計時可行性，以及跨瀏覽器資料隔離的技術限制。
 
+## 🌐 專案動態展示 (Live Demo)
+
+* **POC 測試控制台**：[https://papap35.github.io/in-app-test/index.html](https://papap35.github.io/in-app-test/index.html)
+
+---
+
 ## 🔍 核心驗證三大問題
 
 1. **獨立計時能力**：在 In-App 瀏覽器中，不同的直播間 (不同 URL/頁面 ID) 能否各自用獨立的 Key 紀錄倒數秒數而不互相覆蓋？
